@@ -11,18 +11,28 @@ WHAT'S HERE
 Images and styles are already inside the HTML, so nothing can break by
 being in the wrong folder. Just keep the four files together.
 
-PUTTING IT LIVE ON CLOUDFLARE (about 10 minutes, free)
-  1. Cloudflare dashboard -> Workers & Pages -> Create application
-     -> Get started -> Drag and drop your files.
-  2. Name the project "odosia", drag this whole folder in, Deploy site.
-     You'll get a odosia.pages.dev link — check it looks right there first.
-  3. In the project -> Custom domains -> Set up a domain -> odosia.app
-     (repeat for www.odosia.app if you want it). Cloudflare makes the DNS
-     record itself because the domain is already on your account.
-  4. .app is an HTTPS-only domain, so the site won't load until the
-     certificate is issued — usually a few minutes. That's normal.
+PUTTING IT LIVE ON GOOGLE CLOUD
+  This site is served by nginx on odosia-vm — the same GCE VM that runs the
+  odosia API (see the frenzy-api repo's deploy/ folder), in project
+  frenzy-dev-450203. It's just a third and fourth hostname (odosia.app,
+  www.odosia.app) on nginx alongside api.odosia.app — no separate hosting
+  infra to run or pay for.
 
-  To update later: same project -> Create deployment -> drag the new folder.
+  One-time setup (only needed once, may already be done):
+  1. In Cloudflare DNS, add A records for odosia.app and www.odosia.app
+     pointing at odosia-vm's external IP (same IP api.odosia.app uses).
+  2. On the VM, run frenzy-api's deploy/scripts/setup-ssl.sh — it now also
+     requests a Let's Encrypt cert for odosia.app + www.odosia.app and
+     nginx.conf already has server blocks ready to serve this repo's files
+     from /opt/odosia/website.
+  3. In this repo's GitHub -> Settings -> Secrets and variables -> Actions,
+     add GCE_HOST, GCE_USER, GCE_SSH_KEY (same values used in frenzy-api's
+     deploy-backend.yml — a repo's secrets aren't shared across repos, so
+     they need to be added here too).
+
+  To update after that: just push to main. .github/workflows/deploy.yml
+  rsyncs the site files over SSH straight into /opt/odosia/website on the
+  VM; nginx serves them with no restart needed.
 
 BEFORE YOU SUBMIT TO THE APP STORE
   - Fill in every [BRACKET] in privacy.html and terms.html. Most of them
