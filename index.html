@@ -325,7 +325,7 @@
       the page still works the day you publish it.
    2. FALLBACK_EMAIL: where those emails should go.
    ===================================================================== */
-var ENDPOINT = "";
+var ENDPOINT = "https://docs.google.com/forms/d/e/1FAIpQLSeggKVoWvawh3aAwjsFw75ftcro1TP234pTQ7eTj6S2MUbEZg/formResponse";
 var FALLBACK_EMAIL = "support@odosia.app";
 
 document.querySelectorAll('form.signup').forEach(function (form) {
@@ -334,22 +334,22 @@ document.querySelectorAll('form.signup').forEach(function (form) {
     var email = (input && input.value || '').trim();
     if (!email) return;
 
-    if (!ENDPOINT) {
-      e.preventDefault();
-      window.location.href = 'mailto:' + FALLBACK_EMAIL +
-        '?subject=' + encodeURIComponent('Odosia early access') +
-        '&body=' + encodeURIComponent('Please add ' + email + ' to the Odosia early access list.');
-      done(form);
-      return;
-    }
-
     e.preventDefault();
+
+    var formData = new FormData();
+    formData.append('entry.331113439', email);
+
     fetch(ENDPOINT, {
       method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email })
+      mode: 'no-cors',
+      body: formData
     }).then(function () { done(form); })
-      .catch(function () { form.submit(); });
+      .catch(function () {
+        window.location.href = 'mailto:' + FALLBACK_EMAIL +
+          '?subject=' + encodeURIComponent('Odosia early access') +
+          '&body=' + encodeURIComponent('Please add ' + email + ' to the Odosia early access list.');
+        done(form);
+      });
   });
 });
 
